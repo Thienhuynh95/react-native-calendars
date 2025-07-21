@@ -93,7 +93,9 @@ const Calendar = (props: CalendarProps & ContextProp) => {
     testID,
     style: propsStyle
   } = props;
-  const [currentMonth, setCurrentMonth] = useState(current || initialDate ? parseDate(current || initialDate) : new XDate());
+  const [currentMonth, setCurrentMonth] = useState(
+    current || initialDate ? parseDate(current || initialDate) : new XDate()
+  );
   const style = useRef(styleConstructor(theme));
   const header = useRef();
   const weekNumberMarking = useRef({disabled: true, disableTouchEvent: true});
@@ -111,40 +113,56 @@ const Calendar = (props: CalendarProps & ContextProp) => {
     AccessibilityInfo.announceForAccessibility(_currentMonth.toString('MMMM yyyy'));
   }, [currentMonth]);
 
-  const updateMonth = useCallback((newMonth: XDate) => {
-    if (sameMonth(newMonth, currentMonth)) {
-      return;
-    }
-    setCurrentMonth(newMonth);
-  }, [currentMonth]);
-
-  const addMonth = useCallback((count: number) => {
-    const newMonth = currentMonth.clone().addMonths(count, true);
-    updateMonth(newMonth);
-  }, [currentMonth, updateMonth]);
-
-  const handleDayInteraction = useCallback((date: DateData, interaction?: (date: DateData) => void) => {
-    const day = new XDate(date.dateString);
-
-    if (allowSelectionOutOfRange || !(minDate && !isGTE(day, new XDate(minDate))) && !(maxDate && !isLTE(day, new XDate(maxDate)))) {
-      if (!disableMonthChange) {
-        updateMonth(day);
+  const updateMonth = useCallback(
+    (newMonth: XDate) => {
+      if (sameMonth(newMonth, currentMonth)) {
+        return;
       }
-      if (interaction) {
-        interaction(date);
+      setCurrentMonth(newMonth);
+    },
+    [currentMonth]
+  );
+
+  const addMonth = useCallback(
+    (count: number) => {
+      const newMonth = currentMonth.clone().addMonths(count, true);
+      updateMonth(newMonth);
+    },
+    [currentMonth, updateMonth]
+  );
+
+  const handleDayInteraction = useCallback(
+    (date: DateData, interaction?: (date: DateData) => void) => {
+      const day = new XDate(date.dateString);
+
+      if (
+        allowSelectionOutOfRange ||
+        (!(minDate && !isGTE(day, new XDate(minDate))) && !(maxDate && !isLTE(day, new XDate(maxDate))))
+      ) {
+        if (!disableMonthChange) {
+          updateMonth(day);
+        }
+        if (interaction) {
+          interaction(date);
+        }
       }
-    }
-  }, [minDate, maxDate, allowSelectionOutOfRange, disableMonthChange, updateMonth]);
+    },
+    [minDate, maxDate, allowSelectionOutOfRange, disableMonthChange, updateMonth]
+  );
 
-  const _onDayPress = useCallback((date?: DateData) => {
-    if (date)
-    handleDayInteraction(date, onDayPress);
-  }, [handleDayInteraction, onDayPress]);
+  const _onDayPress = useCallback(
+    (date?: DateData) => {
+      if (date) handleDayInteraction(date, onDayPress);
+    },
+    [handleDayInteraction, onDayPress]
+  );
 
-  const onLongPressDay = useCallback((date?: DateData) => {
-    if (date)
-    handleDayInteraction(date, onDayLongPress);
-  }, [handleDayInteraction, onDayLongPress]);
+  const onLongPressDay = useCallback(
+    (date?: DateData) => {
+      if (date) handleDayInteraction(date, onDayLongPress);
+    },
+    [handleDayInteraction, onDayLongPress]
+  );
 
   const onSwipeLeft = useCallback(() => {
     // @ts-expect-error
@@ -156,21 +174,24 @@ const Calendar = (props: CalendarProps & ContextProp) => {
     header.current?.onPressLeft();
   }, [header]);
 
-  const onSwipe = useCallback((gestureName: string) => {
-    const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT} = swipeDirections;
+  const onSwipe = useCallback(
+    (gestureName: string) => {
+      const {SWIPE_UP, SWIPE_DOWN, SWIPE_LEFT, SWIPE_RIGHT} = swipeDirections;
 
-    switch (gestureName) {
-      case SWIPE_UP:
-      case SWIPE_DOWN:
-        break;
-      case SWIPE_LEFT:
-        constants.isRTL ? onSwipeRight() : onSwipeLeft();
-        break;
-      case SWIPE_RIGHT:
-        constants.isRTL ? onSwipeLeft() : onSwipeRight();
-        break;
-    }
-  }, [onSwipeLeft, onSwipeRight]);
+      switch (gestureName) {
+        case SWIPE_UP:
+        case SWIPE_DOWN:
+          break;
+        case SWIPE_LEFT:
+          constants.isRTL ? onSwipeRight() : onSwipeLeft();
+          break;
+        case SWIPE_RIGHT:
+          constants.isRTL ? onSwipeLeft() : onSwipeRight();
+          break;
+      }
+    },
+    [onSwipeLeft, onSwipeRight]
+  );
 
   const renderWeekNumber = (weekNumber: number) => {
     return (

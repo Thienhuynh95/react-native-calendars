@@ -90,6 +90,10 @@ export interface TimelineProps {
    */
   onChangeOffset?: (offset: number) => void;
   /**
+   * Scroll to a specific offset
+   */
+  scrollToOffset?: number;
+  /**
    * Spacing between overlapping events
    */
   overlapEventsSpacing?: number;
@@ -134,6 +138,7 @@ const Timeline = (props: TimelineProps) => {
     initialTime,
     showNowIndicator,
     scrollOffset,
+    scrollToOffset,
     onChangeOffset,
     overlapEventsSpacing = 0,
     rightEdgeSpacing = 0,
@@ -177,7 +182,9 @@ const Timeline = (props: TimelineProps) => {
 
   useEffect(() => {
     let initialPosition = 0;
-    if (scrollToNow) {
+    if (scrollToOffset) {
+      initialPosition = scrollToOffset;
+    } else if (scrollToNow) {
       initialPosition = calcTimeOffset(HOUR_BLOCK_HEIGHT);
     } else if (scrollToFirst && packedEvents[0].length > 0) {
       initialPosition = min(map(packedEvents[0], 'top')) ?? 0;
@@ -208,37 +215,45 @@ const Timeline = (props: TimelineProps) => {
     [onEventPress, eventTapped]
   );
 
-  const renderEvents = (dayIndex: number) => {
-    const events = packedEvents[dayIndex].map((event: PackedEvent, eventIndex: number) => {
-      const onEventPress = () => _onEventPress(dayIndex, eventIndex);
-      return (
-        <EventBlock
-          key={eventIndex}
-          index={eventIndex}
-          event={event}
-          styles={styles.current}
-          format24h={format24h}
-          onPress={onEventPress}
-          renderEvent={renderEvent}
-          testID={`${testID}.event.${event.id}`}
-        />
-      );
-    });
+  const renderEvents = useCallback(
+    (dayIndex: number) => {
+      const events = packedEvents[dayIndex].map((event: PackedEvent, eventIndex: number) => {
+        const onEventPress = () => _onEventPress(dayIndex, eventIndex);
+        return (
+          <EventBlock
+            key={eventIndex}
+            index={eventIndex}
+            event={event}
+            styles={styles.current}
+            format24h={format24h}
+            onPress={onEventPress}
+            renderEvent={renderEvent}
+            testID={`${testID}.event.${event.id}`}
+          />
+        );
+      });
 
-    return (
-      <View pointerEvents={'box-none'}  style={[{marginLeft: dayIndex === 0 ? timelineLeftInset : undefined}, styles.current.eventsContainer]}>
-        {events}
-      </View>
-    );
-  };
+      return (
+        <View
+          pointerEvents={'box-none'}
+          style={[{marginLeft: dayIndex === 0 ? timelineLeftInset : undefined}, styles.current.eventsContainer]}
+        >
+          {events}
+        </View>
+      );
+    },
+    [packedEvents, format24h, renderEvent, testID, timelineLeftInset, styles, _onEventPress]
+  );
 
   const renderTimelineDay = (dayIndex: number) => {
     const indexOfToday = pageDates.indexOf(generateDay(new Date().toString()));
-    const left = timelineLeftInset + indexOfToday * width / numberOfDays;
+    const left = timelineLeftInset + (indexOfToday * width) / numberOfDays;
     return (
       <React.Fragment key={dayIndex}>
         {renderEvents(dayIndex)}
-        {indexOfToday !== -1 && showNowIndicator && <NowIndicator width={width / numberOfDays} left={left} styles={styles.current}/>}
+        {indexOfToday !== -1 && showNowIndicator && (
+          <NowIndicator width={width / numberOfDays} left={left} styles={styles.current}/>
+        )}
       </React.Fragment>
     );
   };

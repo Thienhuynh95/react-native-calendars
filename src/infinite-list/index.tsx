@@ -7,7 +7,16 @@ import {DataProvider, LayoutProvider, RecyclerListView, RecyclerListViewProps} f
 import constants from '../commons/constants';
 import {useCombinedRefs} from '../hooks';
 
-const dataProviderMaker = (items: string[]) => new DataProvider((item1, item2) => item1 !== item2).cloneWithRows(items);
+const dataProviderMaker = (items: any[]) =>
+  new DataProvider((item1, item2) => {
+    // More efficient comparison for complex objects
+    if (item1 === item2) return true;
+    if (!item1 || !item2) return false;
+    if (typeof item1 === 'object' && typeof item2 === 'object') {
+      return JSON.stringify(item1) === JSON.stringify(item2);
+    }
+    return item1 !== item2;
+  }).cloneWithRows(items);
 
 export interface InfiniteListProps
   extends Omit<RecyclerListViewProps, 'dataProvider' | 'layoutProvider' | 'rowRenderer'> {
@@ -68,7 +77,7 @@ const InfiniteList = (props: InfiniteListProps, ref: any) => {
       }
     )
   );
-  
+
   const shouldFixRTL = useMemo(() => {
     return isHorizontal && constants.isRTL && (constants.isRN73() || constants.isAndroid);
   }, [isHorizontal]);
@@ -86,7 +95,11 @@ const InfiniteList = (props: InfiniteListProps, ref: any) => {
     }
 
     setTimeout(() => {
-      const x = isHorizontal ? shouldFixRTL ? Math.floor(data.length / 2) + 1 : Math.floor(data.length / 2) * pageWidth : 0;
+      const x = isHorizontal
+        ? shouldFixRTL
+          ? Math.floor(data.length / 2) + 1
+          : Math.floor(data.length / 2) * pageWidth
+        : 0;
       const y = isHorizontal ? 0 : positionIndex * pageHeight;
       // @ts-expect-error
       listRef.current?.scrollToOffset?.(x, y, false);
@@ -99,7 +112,7 @@ const InfiniteList = (props: InfiniteListProps, ref: any) => {
 
       const contentOffset = event.nativeEvent.contentOffset;
       const y = contentOffset.y;
-      const x = shouldFixRTL ? (pageWidth * data.length - contentOffset.x) : contentOffset.x;
+      const x = shouldFixRTL ? pageWidth * data.length - contentOffset.x : contentOffset.x;
       const newPageIndex = Math.round(isHorizontal ? x / pageWidth : y / pageHeight);
       if (pageIndex.current !== newPageIndex) {
         if (pageIndex.current !== undefined) {

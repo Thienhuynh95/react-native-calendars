@@ -2,18 +2,18 @@ import React, {useCallback, useContext, useEffect, useMemo, useRef, useState} fr
 import {View} from 'react-native';
 import XDate from 'xdate';
 
-import InfiniteList from '../../infinite-list';
-import Week from '../week';
-import WeekDaysNames from '../../commons/WeekDaysNames';
 import {CalendarListProps} from '../../calendar-list';
-import CalendarContext from '../../expandableCalendar/Context';
-import styleConstructor from '../style';
-import {toMarkingFormat} from '../../interface';
-import {extractCalendarProps} from '../../componentUpdater';
 import constants from '../../commons/constants';
-import {UpdateSources} from '../commons';
+import WeekDaysNames from '../../commons/WeekDaysNames';
+import {extractCalendarProps} from '../../componentUpdater';
 import {sameWeek} from '../../dateutils';
+import InfiniteList from '../../infinite-list';
+import {toMarkingFormat} from '../../interface';
 import {DateData} from '../../types';
+import {UpdateSources} from '../commons';
+import CalendarContext from '../Context';
+import styleConstructor from '../style';
+import Week from '../week';
 
 export interface WeekCalendarProps extends CalendarListProps {
   /** whether to have shadow/elevation for the calendar */
@@ -24,7 +24,17 @@ const NUMBER_OF_PAGES = 50;
 const DEFAULT_PAGE_HEIGHT = 48;
 
 const WeekCalendar = (props: WeekCalendarProps) => {
-  const {current, firstDay = 0, markedDates, allowShadow = true, hideDayNames, theme, calendarWidth, calendarHeight = DEFAULT_PAGE_HEIGHT, testID} = props;
+  const {
+    current,
+    firstDay = 0,
+    markedDates,
+    allowShadow = true,
+    hideDayNames,
+    theme,
+    calendarWidth,
+    calendarHeight = DEFAULT_PAGE_HEIGHT,
+    testID
+  } = props;
   const context = useContext(CalendarContext);
   const {date, updateSource} = context;
   const style = useRef(styleConstructor(theme));
@@ -95,7 +105,7 @@ const WeekCalendar = (props: WeekCalendarProps) => {
         />
       );
     },
-    [date, markedDates]
+    [date, markedDates, props, firstDay, weekStyle, onDayPress, context]
   );
 
   return (
