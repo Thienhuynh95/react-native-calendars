@@ -5,8 +5,8 @@
   "types": "src/index.d.ts",
   "description": "React Native Calendar Components",
   "scripts": {
-    "build": "yarn build:tsc && yarn build:docs",
-    "build:ts": "tsc",
+    "build": "yarn build:ts && yarn build:docs",
+    "build:ts": "tsc --outDir dist",
     "build:dev": "tsc --noEmit",
     "build:docs": "node ./scripts/build-docs.js",
     "e2e": "node ./scripts/test-e2e.js --release",
