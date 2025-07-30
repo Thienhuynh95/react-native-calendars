@@ -182,9 +182,19 @@ const ExpandableCalendar = forwardRef<ExpandableCalendarRef, ExpandableCalendarP
   };
 
   useEffect(() => {
+    /** Scroll */
+    const scrollToDate = (date: string) => {
+      if (!horizontal) {
+        calendarList?.current?.scrollToDay(date, 0, true);
+      } else if (getYear(date) !== visibleYear.current || getMonth(date) !== visibleMonth.current) {
+        // don't scroll if the month is already visible
+        calendarList?.current?.scrollToMonth(date);
+      }
+    };
+
     // date was changed from AgendaList, arrows or scroll
     scrollToDate(date);
-  }, [date]);
+  }, [date, horizontal]);
 
   /** Number of weeks */
 
@@ -322,17 +332,6 @@ const ExpandableCalendar = forwardRef<ExpandableCalendarRef, ExpandableCalendarP
     setScreenReaderEnabled(screenReaderEnabled);
     if (!screenReaderEnabled) {
       setHeaderHeight(DEFAULT_HEADER_HEIGHT);
-    }
-  };
-
-  /** Scroll */
-
-  const scrollToDate = (date: string) => {
-    if (!horizontal) {
-      calendarList?.current?.scrollToDay(date, 0, true);
-    } else if (getYear(date) !== visibleYear.current || getMonth(date) !== visibleMonth.current) {
-      // don't scroll if the month is already visible
-      calendarList?.current?.scrollToMonth(date);
     }
   };
 
