@@ -164,6 +164,18 @@ const CalendarList = (props: CalendarListProps & ContextProp, ref: any) => {
     }
   }, [current]);
 
+  const scrollToMonth = useCallback(
+    (date: XDate | string) => {
+      const scrollTo = parseDate(date);
+      const diffMonths = Math.round(initialDate?.current?.clone().setDate(1).diffMonths(scrollTo?.clone().setDate(1)));
+      const scrollAmount = calendarSize * (shouldFixRTL ? pastScrollRange - diffMonths : pastScrollRange + diffMonths);
+
+      if (scrollAmount !== 0) {
+        list?.current?.scrollToOffset({offset: scrollAmount, animated: animateScroll});
+      }
+    },
+    [calendarSize, shouldFixRTL, pastScrollRange, animateScroll]
+  );
   useDidUpdate(() => {
     const currMont = currentMonth?.clone();
     if (currMont) {
@@ -195,19 +207,6 @@ const CalendarList = (props: CalendarListProps & ContextProp, ref: any) => {
       list?.current?.scrollToOffset({offset: scrollAmount, animated});
     }
   };
-
-  const scrollToMonth = useCallback(
-    (date: XDate | string) => {
-      const scrollTo = parseDate(date);
-      const diffMonths = Math.round(initialDate?.current?.clone().setDate(1).diffMonths(scrollTo?.clone().setDate(1)));
-      const scrollAmount = calendarSize * (shouldFixRTL ? pastScrollRange - diffMonths : pastScrollRange + diffMonths);
-
-      if (scrollAmount !== 0) {
-        list?.current?.scrollToOffset({offset: scrollAmount, animated: animateScroll});
-      }
-    },
-    [calendarSize, shouldFixRTL, pastScrollRange, animateScroll]
-  );
 
   const addMonth = useCallback(
     (count: number) => {
@@ -331,8 +330,12 @@ const CalendarList = (props: CalendarListProps & ContextProp, ref: any) => {
           setCurrentMonth(visibleMonth.current);
         }
       }
+      if (scrollEnabled) {
+        const dates = viewableItems.map(item => xdateToData(parseDate(item.item)));
+        onVisibleMonthsChange?.(dates);
+      }
     },
-    [items, shouldFixRTL, current]
+    [items, shouldFixRTL, current, scrollEnabled]
   );
 
   const viewabilityConfigCallbackPairs = useRef([
