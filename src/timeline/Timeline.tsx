@@ -160,7 +160,7 @@ const Timeline = (props: TimelineProps) => {
     return map(pageDates, d => groupedEvents[d] || []);
   }, [pageDates, groupedEvents]);
   const scrollView = useRef<ScrollView>();
-  const calendarHeight = useRef((end - start) * HOUR_BLOCK_HEIGHT);
+  const calendarHeight = useRef((end - start + 1) * HOUR_BLOCK_HEIGHT + 20);
   const styles = useRef(styleConstructor(theme || props.styles, calendarHeight.current));
 
   const {scrollEvents} = useTimelineOffset({onChangeOffset, scrollOffset, scrollViewRef: scrollView});
